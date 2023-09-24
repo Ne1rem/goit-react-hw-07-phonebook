@@ -1,30 +1,40 @@
 import React from 'react';
 import { ContactFilter } from './ContactFilter';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteContact } from '../../Redux/PhoneSlice';
+import { useEffect } from 'react';
+import { deleteContact, fetchContacts } from 'Redux/operations';
+import { selectContacts, selectError, selectIsLoading, selectStatusFilter } from 'Redux/selector';
 
 export const FormList = () => {
   const dispatch = useDispatch();
+  const contacts = useSelector(selectContacts);
+  const filter = useSelector(selectStatusFilter);
 
-  const contacts = useSelector(state => state.contacts.contacts);
-  const contactFilter = useSelector(state => state.filter.filterValue);
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
 
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(contactFilter.toLowerCase())
-  );
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   return (
     <div>
       <ContactFilter/>
-      <ul>
-        {filteredContacts.map(contact => (
-          <li key={contact.id}>
-            {contact.name}: {contact.number}
-            <button onClick={() => dispatch(deleteContact(contact.id))}>Delete</button>
-          </li>
-        ))} 
-      </ul>
+      {isLoading && !error && <b>Request in progress...</b>}
+      {error && <b>Error: {error}</b>}
+      {contacts?.length > 0 && (
+        <ul>
+          {(filter.length > 0
+              ? contacts.filter(item => item.name.toLowerCase().includes(filter.toLowerCase()))
+              : contacts
+            ).map(item =>( 
+            <li key={item.id}>
+              {item.name}: {item.phone}
+              <button onClick={() => dispatch(deleteContact(item.id))}>Delete</button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
-

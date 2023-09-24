@@ -19,3 +19,8 @@ export const StyledField = styled(Field)`
 export const StyledError = styled(ErrorMessage)`
   color: red;
 `;
+
+export const ErrorText = styled.p`
+  margin: 0;
+  color: red;
+`;
